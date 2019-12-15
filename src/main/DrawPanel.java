@@ -1,5 +1,7 @@
 package main;
 
+import main.draw.IDrawer;
+import main.draw.SimpleEdgePolygonDrawer;
 import main.math.Matrix4Factories;
 import main.math.Vector3;
 import main.math.Vector4;
@@ -10,10 +12,11 @@ import main.thirdDimention.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 
 public class DrawPanel extends JPanel implements MouseMotionListener, MouseListener, MouseWheelListener, KeyListener {
     private ScreenConverter sc;
-    private Camera camera;
+    private Camera cam;
     private Scene scene;
     private IModel tgtModel;
 
@@ -21,8 +24,8 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
     public DrawPanel() {
         super();
         sc = new ScreenConverter(-2, 2, 4, 4, 500, 500);
-        camera = new Camera();
-        scene = new Scene();
+        cam = new Camera();
+        scene = new Scene(Color.WHITE.getRGB());
 
         scene.models.add(new Line3D(new Vector3(0, 0, 0), new Vector3(0, 0, 1)));
         scene.models.add(new Line3D(new Vector3(0, 0, 0), new Vector3(0, 1, 0)));
@@ -31,7 +34,7 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
        // scene.models.add(new Cube());
         //scene.models.add(new Tetrahedron());
         //scene.models.add(new Octahedron());
-        tgtModel = new Icosahedron();
+        tgtModel = new Icosahedron(new Vector3(0,0,0),1);
         scene.models.add(tgtModel);
 
         addMouseListener(this);
@@ -42,7 +45,13 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
 
     @Override
     public void paint(Graphics g) {
-        g.drawImage(scene.drawScene(sc, camera), 0, 0, null);
+        sc.setScreenSize(getWidth(), getHeight());
+        BufferedImage bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = (Graphics2D) bi.getGraphics();
+        IDrawer dr = new SimpleEdgePolygonDrawer(sc, graphics);
+        scene.drawScene(dr, cam);
+        g.drawImage(bi, 0, 0, null);
+        graphics.dispose();
     }
 
     @Override
@@ -75,7 +84,7 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
                 if(!mouseEvent.isShiftDown()) {
                     double da = dx * Math.PI / 180;
                     double db = dy * Math.PI / 280;
-                    camera.modifyRotate(
+                    cam.modifyRotate(
                             Matrix4Factories.rotationXYZ(da, Matrix4Factories.Axis.Y)
                                     .mul(
                                             Matrix4Factories.rotationXYZ(db, Matrix4Factories.Axis.X)
@@ -84,7 +93,7 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
                 } else {
                     double da = dx * Math.PI / 180;
                     double db = dy * Math.PI / 280;
-                    tgtModel.rotate(
+                    tgtModel.transform(
                             Matrix4Factories.rotationXYZ(da, Matrix4Factories.Axis.Y)
                                     .mul(
                                             Matrix4Factories.rotationXYZ(db, Matrix4Factories.Axis.X)
@@ -98,7 +107,7 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
 
                 /*Вектор смещения в реальных координатах с точки зрения камеры*/
                 Vector3 delta = cur.add(zero.mul(-1)).asVector3();
-                camera.modifyTranslate(Matrix4Factories.translation(delta));
+                cam.modifyTranslate(Matrix4Factories.translation(delta));
             }
             /* Если двигаем с зажатой средней кнопкой мыши, то перемещаем камеру
              * вдоль оси Z на расстояние равное изменению положения мыши в реальных координатах.
@@ -112,7 +121,7 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
                 if (dy < 0)
                     length = -length;
                 //System.out.println(length); todo чтоб не потерять важный дебаг
-                camera.modifyTranslate(Matrix4Factories.translation(0, 0, length));
+                cam.modifyTranslate(Matrix4Factories.translation(0, 0, length));
             }
         }
         last = current;
@@ -179,7 +188,7 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
         /*Если зажат Control, то будем менять параметры перспективы, иначе - масштаба*/
         if (mouseWheelEvent.isControlDown()) {
             /*delta*5f - экспериментально подобранное число. Чем меньше, тем быстрее будет изменяться точка схода*/
-            camera.modifyProjection(Matrix4Factories.centralProjection(delta*5f, Matrix4Factories.Axis.Z));
+            cam.modifyProjection(Matrix4Factories.centralProjection(delta*5f, Matrix4Factories.Axis.Z));
         } else {
             /*Вычислим коэффициент масштаба*/
             float factor = 1;
@@ -187,7 +196,7 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
             int counter = delta < 0 ? -delta : delta;
             while (counter-- > 0)
                 factor *= scale;
-            camera.modifyScale(Matrix4Factories.scale(factor));
+            cam.modifyScale(Matrix4Factories.scale(factor));
         }
         repaint();
     }

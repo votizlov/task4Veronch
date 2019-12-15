@@ -91,7 +91,7 @@ public class Octahedron implements IModel {
     }
 
     @Override
-    public void rotate(Matrix4 mul) {
+    public void transform(Matrix4 mul) {
 
     }
 }

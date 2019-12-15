@@ -22,11 +22,12 @@ public class PolyLine3D {
         return points;
     }
 
-    public double avdZ() {
-        double sum = 0;
-        for (int i = 0; i < points.size(); i++) {
-            sum += points.get(i).getZ();
-        }
+    public float avgZ() {
+        if (points == null || points.size() == 0)
+            return 0;
+        float sum = 0;
+        for (Vector3 v : points)
+            sum += v.getZ();
         return sum / points.size();
     }
 }

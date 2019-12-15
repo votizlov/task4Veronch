@@ -4,7 +4,7 @@ import main.math.Matrix4;
 import main.math.Vector3;
 import main.math.Vector4;
 
-public class Camera {
+public class Camera implements ICamera {
     private Matrix4 translate, rotate, scale, projection;
 
     /**
