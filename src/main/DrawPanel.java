@@ -67,13 +67,19 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
             case KeyEvent.VK_X:
-                isX = !isX;
+                isX = true;
+                isY = false;
+                isZ = false;
                 break;
             case KeyEvent.VK_Y:
-                isY = !isY;
+                isY = true;
+                isZ = false;
+                isX = false;
                 break;
             case KeyEvent.VK_Z:
-                isZ = !isZ;
+                isZ = true;
+                isY = false;
+                isX = false;
                 break;
         }
     }
