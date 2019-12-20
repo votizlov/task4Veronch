@@ -8,7 +8,9 @@ public class Main {
         JFrame frame = new JFrame();
         frame.setSize(500, 500);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.add(new DrawPanel());
+        DrawPanel panel = new DrawPanel();
+        frame.add(panel);
+        frame.addKeyListener(panel);
         frame.setVisible(true);
     }
 }

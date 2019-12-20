@@ -1,5 +1,6 @@
 package main.models;
 
+import com.sun.scenario.effect.light.SpotLight;
 import main.math.Matrix4;
 import main.math.Matrix4Factories;
 import main.math.Vector3;
@@ -29,12 +30,12 @@ public class Icosahedron implements IModel {
             lines = new ArrayList<>();
             Vector3 top = new Vector3(0, r, 0);
             Vector3 bottom = new Vector3(0, -r, 0);
-            List<Vector3> topCircle = new Circle(
+            List<Vector3> topCircle = new Pentagon(
                     new Vector3(0, r * 2 / 3, 0),
                     Matrix4Factories.rotationXYZ(26.57, Matrix4Factories.Axis.Z)
                             .mul(new Vector4(top, 1)).asVector3(),
                     new Vector3(0, 1, 0),5).lines.get(0).getPoints();
-            List<Vector3> bottomCircle = new Circle(
+            List<Vector3> bottomCircle = new Pentagon(
                     new Vector3(0, -r * 2 / 3, 0),
                     Matrix4Factories.rotationXYZ(26.57, Matrix4Factories.Axis.Z)
                             .mul(new Vector4(bottom, 1)).asVector3(),
@@ -55,18 +56,22 @@ public class Icosahedron implements IModel {
                         bottomCircle.get(i)
                 ),true));
             }
-            for(int i = 0;i<3;i++){
-                lines.add(new PolyLine3D(Arrays.asList(
-                        bottomCircle.get(i+2),
-                        topCircle.get(i)
-                ),false));
-            }
-
+            lines.addAll(connectCircles(topCircle,bottomCircle));
             lines.add(new PolyLine3D(Arrays.asList(top, bottom), true));
             lines.add(new PolyLine3D(topCircle, true));
             lines.add(new PolyLine3D(bottomCircle, true));
         }
         return lines;
+    }
+
+    private LinkedList<PolyLine3D> connectCircles(List<Vector3> t, List<Vector3> t1) {
+        LinkedList<PolyLine3D> line = new LinkedList<>();
+        for (int i = 1; i < t.size(); i++) {
+            line.add(new PolyLine3D(Arrays.asList(
+                    t.get(i),
+                    t1.get(i - 1)), true));
+        }
+        return line;
     }
 
     @Override

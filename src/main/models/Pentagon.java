@@ -13,7 +13,7 @@ import java.util.List;
 import static java.lang.Math.cos;
 import static java.lang.Math.toRadians;
 
-public class Circle implements IModel {
+public class Pentagon implements IModel {
     Vector3 center, rV;
     LinkedList<PolyLine3D> lines;
 
@@ -25,7 +25,7 @@ public class Circle implements IModel {
         return rV;
     }
 
-    public Circle(Vector3 center, Vector3 rV, Vector3 cV, int res) {
+    public Pentagon(Vector3 center, Vector3 rV, Vector3 cV, int res) {
         cV.normalize();
         this.center = center;
         this.rV = rV;

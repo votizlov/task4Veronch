@@ -31,16 +31,17 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
         scene.models.add(new Line3D(new Vector3(0, 0, 0), new Vector3(0, 1, 0)));
         scene.models.add(new Line3D(new Vector3(0, 0, 0), new Vector3(1, 0, 0)));
 
-       // scene.models.add(new Cube());
+        // scene.models.add(new Cube());
         //scene.models.add(new Tetrahedron());
         //scene.models.add(new Octahedron());
-        tgtModel = new Icosahedron(new Vector3(0,0,0),1);
+        tgtModel = new Icosahedron(new Vector3(0, 0, 0), 1);
         scene.models.add(tgtModel);
 
         addMouseListener(this);
         addMouseMotionListener(this);
         addKeyListener(this);
         addMouseWheelListener(this);
+        this.grabFocus();
     }
 
     @Override
@@ -58,13 +59,29 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
     public void keyTyped(KeyEvent e) {
     }
 
+    boolean isX = false;
+    boolean isY = false;
+    boolean isZ = false;
+
     @Override
     public void keyPressed(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_X:
+                isX = !isX;
+                break;
+            case KeyEvent.VK_Y:
+                isY = !isY;
+                break;
+            case KeyEvent.VK_Z:
+                isZ = !isZ;
+                break;
+        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
     }    /*Здесь запоминаем последнее положение мыши, для которого обрабатывали событие*/
+
     private Point last;
     /*Флаг, фиксирующий, зажата ли сейчас левая кнопка мыши*/
     private boolean leftFlag = false;
@@ -72,6 +89,7 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
     private boolean rightFlag = false;
     /*Флаг, фиксирующий, зажата ли сейчас средняя кнопка мыши*/
     private boolean middleFlag = false;
+
     @Override
     public void mouseDragged(MouseEvent mouseEvent) {
         Point current = mouseEvent.getPoint();
@@ -81,7 +99,7 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
             int dy = current.y - last.y;
             /*Если двигаем с зажатой левой кнопкой мыши, то вращаем камеру*/
             if (leftFlag) {
-                if(!mouseEvent.isShiftDown()) {
+                if (!mouseEvent.isShiftDown()) {
                     double da = dx * Math.PI / 180;
                     double db = dy * Math.PI / 280;
                     cam.modifyRotate(
@@ -93,16 +111,24 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
                 } else {
                     double da = dx * Math.PI / 180;
                     double db = dy * Math.PI / 280;
-                    tgtModel.transform(
-                            Matrix4Factories.rotationXYZ(da, Matrix4Factories.Axis.Y)
-                                    .mul(
-                                            Matrix4Factories.rotationXYZ(db, Matrix4Factories.Axis.X)
-                                    ));
+                    if (isX) {
+                        tgtModel.transform(
+                                Matrix4Factories.rotationXYZ(da, Matrix4Factories.Axis.X)
+                        );
+                    } else if (isY) {
+                        tgtModel.transform(
+                                Matrix4Factories.rotationXYZ(db, Matrix4Factories.Axis.Y)
+                        );
+                    } else if (isZ) {
+                        tgtModel.transform(
+                                Matrix4Factories.rotationXYZ(da, Matrix4Factories.Axis.Z)
+                        );
+                    }
                 }
             }
             /*Если двигаем с зажатой правой кнопкой мыши, то перемещаем камеру вдоль осей X и Y*/
             if (rightFlag) {
-                Vector4 zero = new Vector4(sc.s2r(new ScreenPoint(0, 0)),0f);
+                Vector4 zero = new Vector4(sc.s2r(new ScreenPoint(0, 0)), 0f);
                 Vector4 cur = new Vector4(sc.s2r(new ScreenPoint(dx, dy)), 0f);
 
                 /*Вектор смещения в реальных координатах с точки зрения камеры*/
@@ -188,7 +214,7 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
         /*Если зажат Control, то будем менять параметры перспективы, иначе - масштаба*/
         if (mouseWheelEvent.isControlDown()) {
             /*delta*5f - экспериментально подобранное число. Чем меньше, тем быстрее будет изменяться точка схода*/
-            cam.modifyProjection(Matrix4Factories.centralProjection(delta*5f, Matrix4Factories.Axis.Z));
+            cam.modifyProjection(Matrix4Factories.centralProjection(delta * 5f, Matrix4Factories.Axis.Z));
         } else {
             /*Вычислим коэффициент масштаба*/
             float factor = 1;
