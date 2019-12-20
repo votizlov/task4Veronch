@@ -66,10 +66,23 @@ public class Icosahedron implements IModel {
 
     private LinkedList<PolyLine3D> connectCircles(List<Vector3> t, List<Vector3> t1) {
         LinkedList<PolyLine3D> line = new LinkedList<>();
-        for (int i = 1; i < t.size(); i++) {
+        int j = 2;
+        for (int i = 0; i < t.size(); i++) {
             line.add(new PolyLine3D(Arrays.asList(
                     t.get(i),
-                    t1.get(i - 1)), true));
+                    t1.get(j)), true));
+            j++;
+            if (j==5)
+                j=0;
+        }
+        j = 2;
+        for (int i = 0; i < t.size(); i++) {
+            line.add(new PolyLine3D(Arrays.asList(
+                    t1.get(i),
+                    t.get(j)), true));
+            j++;
+            if (j==5)
+                j=0;
         }
         return line;
     }
